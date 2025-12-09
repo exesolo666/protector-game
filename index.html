@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protector: Бережный шиномонтаж — Кликер</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-logo-circle"></div>
+        <div class="brand-text">
+          <div class="brand-title">Protector</div>
+          <div class="brand-subtitle">Бережный шиномонтаж — кликер</div>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <span class="top-pill">VK Mini Ready</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- ЭКРАН: СЕРВИС -->
+      <section class="screen screen--active" data-screen="service">
+        <div class="service-layout">
+          <div class="wheel-zone">
+            <div class="wheel-wrapper">
+              <div id="wheelButton" class="wheel">
+                <div class="wheel-inner"></div>
+              </div>
+              <div id="floatingContainer" class="floating-container"></div>
+            </div>
+
+            <div class="care-panel">
+              <div class="care-header">
+                <span>Бережность сервиса</span>
+                <span id="careLabel" class="care-label">100%</span>
+              </div>
+              <div class="care-bar">
+                <div id="careFill" class="care-fill"></div>
+              </div>
+              <div class="care-hint">
+                Жми быстро, но аккуратно — спам понижает оплату от клиентов.
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-panel">
+            <div class="stat-card">
+              <div class="stat-label">Баланс</div>
+              <div class="stat-value">
+                <span id="moneyValue">0</span>
+                <span class="currency">₽</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-mini">
+                <div class="stat-mini-label">Обслужено колёс</div>
+                <div id="wheelsValue" class="stat-mini-value">0</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-label">Пассивный доход / сек</div>
+                <div id="autoIncomeValue" class="stat-mini-value">0</div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-mini">
+                <div class="stat-mini-label">Доход за аккуратный клик</div>
+                <div id="clickIncomeValue" class="stat-mini-value">0</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-label">Шанс чаевых</div>
+                <div id="tipChanceValue" class="stat-mini-value">0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ЭКРАН: УЛУЧШЕНИЯ -->
+      <section class="screen" data-screen="upgrades">
+        <h2 class="screen-title">Улучшения сервиса</h2>
+        <p class="screen-subtitle">
+          Вкладывайся в оборудование, обучение и рекламу, чтобы Protector
+          зарабатывал даже когда ты не в игре.
+        </p>
+
+        <div id="upgradesList" class="upgrades-list"></div>
+      </section>
+
+      <!-- ЭКРАН: СТАТИСТИКА -->
+      <section class="screen" data-screen="stats">
+        <h2 class="screen-title">Статистика сервиса</h2>
+        <p class="screen-subtitle">
+          Следи за ростом сервиса бережного шиномонтажа Protector.
+        </p>
+
+        <div id="statsContainer" class="stats-cards">
+          <!-- наполняется из JS -->
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn nav-btn--active" data-target="service">
+        Сервис
+      </button>
+      <button class="nav-btn" data-target="upgrades">
+        Улучшения
+      </button>
+      <button class="nav-btn" data-target="stats">
+        Статистика
+      </button>
+    </nav>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
