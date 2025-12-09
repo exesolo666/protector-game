@@ -2,122 +2,712 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <title>Игра на память — пары картинок</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Protector: Бережный шиномонтаж — Кликер</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --bg: #05060a;
+      --bg-soft: #0b0f16;
+      --accent: #f5b007;
+      --accent-soft: rgba(245, 176, 7, 0.16);
+      --card-back: #131822;
+      --card-front-bg: #000;
+      --text: #f5f5f5;
+      --muted: #a9b0c2;
+      --danger: #ff4b5c;
+      --border-soft: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #252b35 0, #05060a 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      max-width: 1040px;
+      background: rgba(3, 5, 10, 0.96);
+      border-radius: 24px;
+      padding: 20px 20px 24px;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--border-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .game-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .title-block h1 {
+      font-size: 1.4rem;
+      margin-bottom: 2px;
+    }
+
+    .title-block p {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--accent);
+      color: #111;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .game-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(13, 18, 30, 0.96), rgba(5, 7, 14, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 14px;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.82rem;
+    }
+
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-select {
+      position: relative;
+    }
+
+    select {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(4, 6, 12, 0.96);
+      color: var(--text);
+      padding: 6px 28px 6px 10px;
+      font-size: 0.8rem;
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .stat-select::after {
+      content: "▾";
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.6rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    #lives {
+      display: flex;
+      gap: 4px;
+      font-size: 1rem;
+    }
+
+    .life {
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .life-full {
+      color: var(--accent);
+    }
+
+    .life-empty {
+      color: rgba(255, 255, 255, 0.16);
+    }
+
+    #timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 1rem;
+    }
+
+    .timer-critical {
+      color: var(--danger);
+    }
+
+    .game-main {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top, rgba(65, 76, 96, 0.18), rgba(3, 5, 9, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      perspective: 900px;
+      border-radius: 14px;
+      aspect-ratio: 3 / 4;
+      max-width: 140px;
+      margin-inline: auto;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      transform-style: preserve-3d;
+      transition: transform 0.28s ease-out;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .card-back {
+      background: radial-gradient(circle at top, #222b3c, #090c12);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .card-back::after {
+      content: "?";
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      background: var(--card-front-bg);
+    }
+
+    .card-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card.flipped .card-inner,
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card.matched {
+      cursor: default;
+    }
+
+    .card.matched .card-inner {
+      box-shadow: 0 0 0 2px var(--accent), 0 14px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .card.disabled {
+      pointer-events: none;
+    }
+
+    .status-text {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .status-text strong {
+      color: var(--accent);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: var(--bg-soft);
+      border-radius: 20px;
+      padding: 22px 22px 18px;
+      max-width: 420px;
+      width: calc(100% - 40px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+
+    .modal-content h2 {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-content p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    @media (max-width: 700px) {
+      .game-wrapper {
+        padding: 14px;
+        border-radius: 18px;
+      }
+
+      .game-header {
+        align-items: flex-start;
+      }
+
+      .title-block h1 {
+        font-size: 1.2rem;
+      }
+
+      .game-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        aspect-ratio: 2.4 / 3;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <header class="top-bar">
-      <div class="brand">
-        <div class="brand-logo-circle"></div>
-        <div class="brand-text">
-          <div class="brand-title">Protector</div>
-          <div class="brand-subtitle">Бережный шиномонтаж — кликер</div>
-        </div>
+  <div class="game-wrapper">
+    <header class="game-header">
+      <div class="title-block">
+        <h1>Игра на память — найди пару</h1>
+        <p>Открывай карты, ищи одинаковые картинки, не теряй жизни.</p>
       </div>
-      <div class="top-bar-right">
-        <span class="top-pill">VK Mini Ready</span>
+      <div class="header-controls">
+        <button id="restartBtn" class="btn btn-secondary">Перезапустить</button>
       </div>
     </header>
 
-    <main class="main">
-      <!-- ЭКРАН: СЕРВИС -->
-      <section class="screen screen--active" data-screen="service">
-        <div class="service-layout">
-          <div class="wheel-zone">
-            <div class="wheel-wrapper">
-              <div id="wheelButton" class="wheel">
-                <div class="wheel-inner"></div>
-              </div>
-              <div id="floatingContainer" class="floating-container"></div>
-            </div>
-
-            <div class="care-panel">
-              <div class="care-header">
-                <span>Бережность сервиса</span>
-                <span id="careLabel" class="care-label">100%</span>
-              </div>
-              <div class="care-bar">
-                <div id="careFill" class="care-fill"></div>
-              </div>
-              <div class="care-hint">
-                Жми быстро, но аккуратно — спам понижает оплату от клиентов.
-              </div>
-            </div>
-          </div>
-
-          <div class="stats-panel">
-            <div class="stat-card">
-              <div class="stat-label">Баланс</div>
-              <div class="stat-value">
-                <span id="moneyValue">0</span>
-                <span class="currency">₽</span>
-              </div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-mini">
-                <div class="stat-mini-label">Обслужено колёс</div>
-                <div id="wheelsValue" class="stat-mini-value">0</div>
-              </div>
-              <div class="stat-mini">
-                <div class="stat-mini-label">Пассивный доход / сек</div>
-                <div id="autoIncomeValue" class="stat-mini-value">0</div>
-              </div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-mini">
-                <div class="stat-mini-label">Доход за аккуратный клик</div>
-                <div id="clickIncomeValue" class="stat-mini-value">0</div>
-              </div>
-              <div class="stat-mini">
-                <div class="stat-mini-label">Шанс чаевых</div>
-                <div id="tipChanceValue" class="stat-mini-value">0%</div>
-              </div>
-            </div>
-          </div>
+    <section class="game-stats">
+      <div class="stat-block">
+        <span class="stat-label">Сложность</span>
+        <div class="stat-select">
+          <select id="difficulty">
+            <option value="easy">Лёгкий — 10:00</option>
+            <option value="medium">Средний — 6:00</option>
+            <option value="hard">Сложный — 3:00</option>
+          </select>
         </div>
-      </section>
+      </div>
 
-      <!-- ЭКРАН: УЛУЧШЕНИЯ -->
-      <section class="screen" data-screen="upgrades">
-        <h2 class="screen-title">Улучшения сервиса</h2>
-        <p class="screen-subtitle">
-          Вкладывайся в оборудование, обучение и рекламу, чтобы Protector
-          зарабатывал даже когда ты не в игре.
-        </p>
-
-        <div id="upgradesList" class="upgrades-list"></div>
-      </section>
-
-      <!-- ЭКРАН: СТАТИСТИКА -->
-      <section class="screen" data-screen="stats">
-        <h2 class="screen-title">Статистика сервиса</h2>
-        <p class="screen-subtitle">
-          Следи за ростом сервиса бережного шиномонтажа Protector.
-        </p>
-
-        <div id="statsContainer" class="stats-cards">
-          <!-- наполняется из JS -->
+      <div class="stat-block">
+        <span class="stat-label">Жизни</span>
+        <div class="stat-value">
+          <div id="lives"></div>
         </div>
-      </section>
+      </div>
+
+      <div class="stat-block">
+        <span class="stat-label">Таймер</span>
+        <div class="stat-value">
+          <span id="timer">10:00</span>
+        </div>
+      </div>
+    </section>
+
+    <main class="game-main">
+      <div id="board" class="board"></div>
+      <div id="statusText" class="status-text"></div>
     </main>
-
-    <nav class="bottom-nav">
-      <button class="nav-btn nav-btn--active" data-target="service">
-        Сервис
-      </button>
-      <button class="nav-btn" data-target="upgrades">
-        Улучшения
-      </button>
-      <button class="nav-btn" data-target="stats">
-        Статистика
-      </button>
-    </nav>
-
-    <div id="toast" class="toast"></div>
   </div>
 
-  <script src="script.js"></script>
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modal-title"></h2>
+      <p id="modal-message"></p>
+      <div class="modal-actions">
+        <button id="modal-restart" class="btn">Играть снова</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --------------- НАСТРОЙКА СЛОЖНОСТЕЙ -----------------
+    const difficulties = {
+      easy: { label: "Лёгкий", seconds: 10 * 60 },   // 10 минут
+      medium: { label: "Средний", seconds: 6 * 60 }, // 6 минут
+      hard: { label: "Сложный", seconds: 3 * 60 }    // 3 минуты
+    };
+
+    const MAX_LIVES = 5;
+
+    // --------------- ВАШИ КАРТИНКИ -----------------
+    /*
+      СЮДА ВСТАВЬ СВОИ ИЗОБРАЖЕНИЯ.
+
+      Примеры:
+        'images/disk1.jpg',
+        'images/disk2.jpg',
+        'images/disk3.jpg',
+        ...
+
+      Каждое значение — ПУТЬ до файла (локальный или URL).
+      Игра сама сделает по 2 карты каждой картинки.
+    */
+    const imageList = [
+      // Временные заглушки для проверки — замени на свои картинки
+      "https://placehold.co/400x600?text=1",
+      "https://placehold.co/400x600?text=2",
+      "https://placehold.co/400x600?text=3",
+      "https://placehold.co/400x600?text=4",
+      "https://placehold.co/400x600?text=5",
+      "https://placehold.co/400x600?text=6"
+    ];
+
+    // --------------- ЭЛЕМЕНТЫ DOM -----------------
+    const boardEl = document.getElementById("board");
+    const livesEl = document.getElementById("lives");
+    const timerEl = document.getElementById("timer");
+    const difficultySelect = document.getElementById("difficulty");
+    const statusTextEl = document.getElementById("statusText");
+    const restartBtn = document.getElementById("restartBtn");
+
+    const modalEl = document.getElementById("modal");
+    const modalTitleEl = document.getElementById("modal-title");
+    const modalMessageEl = document.getElementById("modal-message");
+    const modalRestartBtn = document.getElementById("modal-restart");
+
+    // --------------- СОСТОЯНИЕ ИГРЫ -----------------
+    let currentDifficulty = "easy";
+    let lives = MAX_LIVES;
+    let timeLeft = difficulties[currentDifficulty].seconds;
+    let timerId = null;
+
+    let flippedCards = []; // массив из 0–2 DOM-элементов-карт
+    let lockBoard = false;
+    let matchedPairs = 0;
+    let totalPairs = imageList.length;
+
+    // --------------- УТИЛИТЫ -----------------
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    // --------------- ОТОБРАЖЕНИЕ ЖИЗНЕЙ / ТАЙМЕРА / СТАТУСА -----------------
+    function updateLivesUI() {
+      livesEl.innerHTML = "";
+      for (let i = 0; i < MAX_LIVES; i++) {
+        const span = document.createElement("span");
+        span.classList.add("life");
+        if (i < lives) {
+          span.classList.add("life-full");
+          span.textContent = "♥";
+        } else {
+          span.classList.add("life-empty");
+          span.textContent = "♥";
+        }
+        livesEl.appendChild(span);
+      }
+    }
+
+    function updateTimerUI() {
+      timerEl.textContent = formatTime(timeLeft);
+      if (timeLeft <= 30) {
+        timerEl.classList.add("timer-critical");
+      } else {
+        timerEl.classList.remove("timer-critical");
+      }
+    }
+
+    function updatePairsStatus() {
+      const remaining = totalPairs - matchedPairs;
+      if (remaining > 0) {
+        statusTextEl.innerHTML = `Осталось пар: <strong>${remaining}</strong>`;
+      } else {
+        statusTextEl.innerHTML = "";
+      }
+    }
+
+    // --------------- ТАЙМЕР -----------------
+    function startTimer() {
+      if (timerId) clearInterval(timerId);
+
+      updateTimerUI();
+      timerId = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          updateTimerUI();
+          clearInterval(timerId);
+          timerId = null;
+          endGame(false, "time");
+        } else {
+          updateTimerUI();
+        }
+      }, 1000);
+    }
+
+    // --------------- ПОСТРОЕНИЕ КОЛОДЫ И ДОСКИ -----------------
+    function createDeck() {
+      const deck = [];
+      imageList.forEach((src, index) => {
+        // каждая картинка — две карты с одним pairId
+        deck.push({ id: index, src });
+        deck.push({ id: index, src });
+      });
+      return shuffle(deck);
+    }
+
+    function createCardElement(cardData) {
+      const card = document.createElement("button");
+      card.className = "card";
+      card.dataset.pairId = String(cardData.id);
+
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-face card-back"></div>
+          <div class="card-face card-front">
+            <img src="${cardData.src}" alt="Картинка ${cardData.id + 1}" />
+          </div>
+        </div>
+      `;
+
+      card.addEventListener("click", () => onCardClick(card));
+      return card;
+    }
+
+    function buildBoard() {
+      boardEl.innerHTML = "";
+      const deck = createDeck();
+      totalPairs = imageList.length;
+      matchedPairs = 0;
+      flippedCards = [];
+      lockBoard = false;
+
+      deck.forEach(cardData => {
+        const cardEl = createCardElement(cardData);
+        boardEl.appendChild(cardEl);
+      });
+
+      updatePairsStatus();
+    }
+
+    // --------------- ЛОГИКА ИГРЫ: КЛИК ПО КАРТЕ -----------------
+    function onCardClick(card) {
+      if (lockBoard) return;
+      if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
+
+      card.classList.add("flipped");
+      flippedCards.push(card);
+
+      if (flippedCards.length === 2) {
+        checkForMatch();
+      }
+    }
+
+    function checkForMatch() {
+      const [card1, card2] = flippedCards;
+      const isMatch = card1.dataset.pairId === card2.dataset.pairId;
+
+      if (isMatch) {
+        card1.classList.add("matched");
+        card2.classList.add("matched");
+        card1.classList.add("disabled");
+        card2.classList.add("disabled");
+
+        matchedPairs++;
+        flippedCards = [];
+        updatePairsStatus();
+
+        if (matchedPairs === totalPairs) {
+          endGame(true);
+        }
+      } else {
+        lockBoard = true;
+        lives--;
+        updateLivesUI();
+
+        setTimeout(() => {
+          card1.classList.remove("flipped");
+          card2.classList.remove("flipped");
+          flippedCards = [];
+          lockBoard = false;
+
+          if (lives <= 0) {
+            endGame(false, "lives");
+          }
+        }, 600);
+      }
+    }
+
+    // --------------- ОКОНЧАНИЕ ИГРЫ -----------------
+    function endGame(isWin, reason) {
+      lockBoard = true;
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+
+      let title = "";
+      let message = "";
+
+      if (isWin) {
+        title = "Поздравляем!";
+        message = "Вы нашли все пары до того, как закончились время и жизни.";
+      } else if (reason === "time") {
+        title = "Время вышло";
+        message = "Таймер истёк. Попробуйте ещё раз или выберите другую сложность.";
+      } else if (reason === "lives") {
+        title = "Жизни закончились";
+        message = "Вы допустили слишком много ошибок. Попробуйте ещё раз!";
+      } else {
+        title = "Игра окончена";
+        message = "Попробуйте ещё раз!";
+      }
+
+      showModal(title, message);
+    }
+
+    function showModal(title, message) {
+      modalTitleEl.textContent = title;
+      modalMessageEl.textContent = message;
+      modalEl.classList.remove("hidden");
+    }
+
+    function hideModal() {
+      modalEl.classList.add("hidden");
+    }
+
+    // --------------- НАЧАЛО/ПЕРЕЗАПУСК ИГРЫ -----------------
+    function resetState() {
+      lives = MAX_LIVES;
+      timeLeft = difficulties[currentDifficulty].seconds;
+      updateLivesUI();
+      updateTimerUI();
+      statusTextEl.textContent = "";
+    }
+
+    function startGame() {
+      hideModal();
+      resetState();
+      buildBoard();
+      startTimer();
+    }
+
+    // --------------- ОБРАБОТЧИКИ СОБЫТИЙ -----------------
+    difficultySelect.addEventListener("change", () => {
+      currentDifficulty = difficultySelect.value;
+      startGame(); // новый раунд с новым временем
+    });
+
+    restartBtn.addEventListener("click", () => {
+      startGame();
+    });
+
+    modalRestartBtn.addEventListener("click", () => {
+      startGame();
+    });
+
+    // --------------- СТАРТ ПРИ ЗАГРУЗКЕ -----------------
+    if (imageList.length < 2) {
+      statusTextEl.textContent = "Добавьте хотя бы две картинки в imageList в коде игры.";
+    } else {
+      startGame();
+    }
+  </script>
 </body>
 </html>
