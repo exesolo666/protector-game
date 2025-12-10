@@ -1,0 +1,22 @@
+.card-back {
+  background: #000; /* запасной цвет под картинкой */
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* Убираем вопросительный знак */
+.card-back::after {
+  content: "";
+}
+
+/* Делаем картинку рубашки фоном */
+.card-back {
+  background-image: url("images/card-back.jpg"); /* путь до твоей рубашки */
+  background-size: cover;       /* заполнить всю карту */
+  background-position: center;  /* по центру */
+  background-repeat: no-repeat; /* без повторов */
+}
